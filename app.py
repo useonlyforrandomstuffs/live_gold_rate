@@ -134,18 +134,28 @@ def price_monitor():
                         "status": "success"
                     }
                     
-                    if(not(isSent_gold) and (price_data['gold_price'] < int(os.getenv('THRESHOLD_GOLD')))):
+                    # Extract numeric value from gold price (remove commas and non-numeric chars)
+                    if("." in price_data['gold_price']):
+                        gold_price_numeric = int(price_data['gold_price'][1:].split(".")[0])
+                    else:
+                        gold_price_numeric = int(price_data['gold_price'][1:].split("/")[0])
+                        
+                    threshold_gold = int(os.getenv('THRESHOLD_GOLD'))
+                    
+                    
+                    
+                    if(not(isSent_gold) and (gold_price_numeric < threshold_gold)):
                         sender = GmailSender()
                         html_content = f"""
                         <html>
                             <body>
                                 <h2>Gold Price Update</h2>
-                                <p>Current gold price: <strong>₹{price_data['gold_price']}</strong></p>
+                                <p>Current gold price: <strong>{price_data['gold_price']}</strong></p>
                             </body>
                         </html>
                         """
                         sender.send_email(
-                            to_email="nitishm.23it@kongu.edu",
+                            recipient_email="nitishm.23it@kongu.edu",
                             subject="Gold Price Dropped!!",
                             body=html_content,
                             is_html=True
@@ -154,18 +164,25 @@ def price_monitor():
                         print("Gold price mail sent successfully!")
                         
                     
-                    if(not(isSent_silver) and (price_data['silver_price'] < int(os.getenv('THRESHOLD_SILVER')))):
+                    # Extract numeric value from silver price (remove commas and non-numeric chars)
+                    if("." in price_data['silver_price']):
+                        silver_price_numeric = int(price_data['silver_price'][1:].split(".")[0])
+                    else:
+                        silver_price_numeric = int(price_data['silver_price'][1:].split("/")[0])
+                    threshold_silver = int(os.getenv('THRESHOLD_SILVER'))
+                    
+                    if(not(isSent_silver) and (silver_price_numeric < threshold_silver)):
                         sender = GmailSender()
                         html_content = f"""
                         <html>
                             <body>
                                 <h2>Silver Price Update</h2>
-                                <p>Current silver price: <strong>₹{price_data['silver_price']}</strong></p>
+                                <p>Current silver price: <strong>{price_data['silver_price']}</strong></p>
                             </body>
                         </html>
                         """
                         sender.send_email(
-                            to_email="nitishm.23it@kongu.edu",
+                            recipient_email="nitishm.23it@kongu.edu",
                             subject="Silver Price Dropped!!",
                             body=html_content,
                             is_html=True
