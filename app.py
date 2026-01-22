@@ -16,8 +16,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+import os
+from dotenv import load_dotenv
+from email_sender import GmailSender
 
 app = Flask(__name__)
+
+isSent_gold = False
+isSent_silver = False
+
+load_dotenv()
 
 # Global storage for prices
 price_data = {
@@ -123,6 +131,44 @@ def price_monitor():
                         "last_updated": current_time,
                         "status": "success"
                     }
+                    
+                    if(isSent_gold and (price_data['gold_price'] < int(os.getenv('THRESHOLD_GOLD')))):
+                        sender = GmailSender()
+                        html_content = f"""
+                        <html>
+                            <body>
+                                <h2>Gold Price Update</h2>
+                                <p>Current gold price: <strong>₹{price_data['gold_price']}</strong></p>
+                            </body>
+                        </html>
+                        """
+                        sender.send_email(
+                            to_email="nitishm.23it@kongu.edu",
+                            subject="Gold Price Dropped!!",
+                            body=html_content,
+                            is_html=True
+                        )
+                        print("Gold price mail sent successfully!")
+                        
+                    
+                    if(isSent_silver and (price_data['silver_price'] < int(os.getenv('THRESHOLD_SILVER')))):
+                        sender = GmailSender()
+                        html_content = f"""
+                        <html>
+                            <body>
+                                <h2>Silver Price Update</h2>
+                                <p>Current silver price: <strong>₹{price_data['silver_price']}</strong></p>
+                            </body>
+                        </html>
+                        """
+                        sender.send_email(
+                            to_email="nitishm.23it@kongu.edu",
+                            subject="Silver Price Dropped!!",
+                            body=html_content,
+                            is_html=True
+                        )
+                        print("Silver price mail sent successfully!")
+                    
                     print(f"{current_time} | Gold: {gold_price} | Silver: {silver_price}")
                 else:
                     price_data["status"] = "error"
