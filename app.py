@@ -132,7 +132,7 @@ def price_monitor():
                         "status": "success"
                     }
                     
-                    if(isSent_gold and (price_data['gold_price'] < int(os.getenv('THRESHOLD_GOLD')))):
+                    if(not(isSent_gold) and (price_data['gold_price'] < int(os.getenv('THRESHOLD_GOLD')))):
                         sender = GmailSender()
                         html_content = f"""
                         <html>
@@ -148,10 +148,11 @@ def price_monitor():
                             body=html_content,
                             is_html=True
                         )
+                        isSent_gold = True
                         print("Gold price mail sent successfully!")
                         
                     
-                    if(isSent_silver and (price_data['silver_price'] < int(os.getenv('THRESHOLD_SILVER')))):
+                    if(not(isSent_silver) and (price_data['silver_price'] < int(os.getenv('THRESHOLD_SILVER')))):
                         sender = GmailSender()
                         html_content = f"""
                         <html>
@@ -167,6 +168,7 @@ def price_monitor():
                             body=html_content,
                             is_html=True
                         )
+                        isSent_silver = True
                         print("Silver price mail sent successfully!")
                     
                     print(f"{current_time} | Gold: {gold_price} | Silver: {silver_price}")
