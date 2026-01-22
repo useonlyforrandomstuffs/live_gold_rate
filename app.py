@@ -110,6 +110,8 @@ def extract_prices(driver):
 def price_monitor():
     """Background thread that continuously monitors prices"""
     global price_data
+    global isSent_silver
+    global isSent_gold
     driver = None
     
     try:
