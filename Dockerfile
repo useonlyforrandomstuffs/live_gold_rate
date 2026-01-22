@@ -17,13 +17,9 @@ RUN wget -q -O /tmp/google-chrome.gpg https://dl-ssl.google.com/linux/linux_sign
     && rm -rf /var/lib/apt/lists/* /tmp/google-chrome.gpg
 
 # Install ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
-    && wget -q "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}.0.0.0/linux64/chromedriver-linux64.zip" -O /tmp/chromedriver.zip || \
-       wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}.0.6778.87/linux64/chromedriver-linux64.zip" -O /tmp/chromedriver.zip \
-    && unzip /tmp/chromedriver.zip -d /tmp \
-    && mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/ \
-    && chmod +x /usr/local/bin/chromedriver \
-    && rm -rf /tmp/chromedriver*
+RUN apt-get update && apt-get install -y chromium-driver \
+    && ln -s /usr/bin/chromedriver /usr/local/bin/chromedriver \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
 ENV CHROME_BIN=/usr/bin/google-chrome
