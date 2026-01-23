@@ -41,6 +41,10 @@ URL = "https://auragold.in"
 # Refresh interval in seconds (1 minute)
 REFRESH_INTERVAL = 60
 
+# Keep-alive settings to prevent Render from sleeping
+KEEP_ALIVE_INTERVAL = 600  # Self-ping every 10 minutes
+RENDER_URL = os.environ.get("RENDER_URL", "")  # Set this in Render environment variables
+
 
 def setup_driver():
     """Setup Chrome driver with headless options for hosting environments"""
@@ -218,7 +222,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraGold Live Prices</title>
+    <title>Gold-Silver Live Prices</title>
     <style>
         * {
             margin: 0;
@@ -310,7 +314,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
     <div class="container">
-        <h1>🏆 AuraGold Live Prices</h1>
+        <h1>🏆 Gold-Silver Live Prices</h1>
         
         <div class="price-card gold">
             <div class="price-label">Live Gold Price</div>
@@ -398,11 +402,30 @@ def health():
     })
 
 
+def keep_alive():
+    """Self-ping to prevent Render from sleeping (15-min inactivity timeout)"""
+    while True:
+        try:
+            time.sleep(KEEP_ALIVE_INTERVAL)
+            if RENDER_URL:
+                response = requests.get(f"{RENDER_URL}/health", timeout=10)
+                print(f"Keep-alive ping sent at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Status: {response.status_code}")
+            else:
+                print(f"Keep-alive: RENDER_URL not set. Skipping self-ping.")
+        except Exception as e:
+            print(f"Keep-alive error: {e}")
+
+
 def start_background_monitor():
     """Start the price monitor in a background thread"""
     monitor_thread = threading.Thread(target=price_monitor, daemon=True)
     monitor_thread.start()
     print("Background price monitor started!")
+    
+    # Start keep-alive thread to prevent Render from sleeping
+    keepalive_thread = threading.Thread(target=keep_alive, daemon=True)
+    keepalive_thread.start()
+    print("Keep-alive monitor started!")
 
 
 # Start the background monitor when the app starts
